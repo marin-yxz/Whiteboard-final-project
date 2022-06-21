@@ -15,7 +15,7 @@ export default function Home() {
   const imageUrl = useRef(null);
   const [imageData, setImageData] = useState('');
   const [canvascontext, setCanvascontext] = useState('');
-  const [clearCanvas, setClearCanvas] = useState(true);
+  // const [clearCanvas, setClearCanvas] = useState(true);
   const [stateList, setStateList] = useState([]);
   //  CANVAS FUNCTIONS FOR DRAWING DELETING
   function startDrawing({ nativeEvent }) {
@@ -31,11 +31,11 @@ export default function Home() {
     const imgData = canvas.toDataURL();
     socket.emit('canvas', { post: imgData });
   };
-  const deleteCanvas = () => {
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    context.clearRect(0, 0, canvas.width, canvas.height);
-  };
+  // const deleteCanvas = () => {
+  //   const canvas = canvasRef.current;
+  //   const context = canvas.getContext('2d');
+  //   context.clearRect(0, 0, canvas.width, canvas.height);
+  // };
   const draw = useCallback(
     ({ nativeEvent }) => {
       if (!isDrawing) {
@@ -81,7 +81,6 @@ export default function Home() {
   socket.on('message', (data) => {
     setList([...list, data]);
   });
-  function renderCanvas() {}
   socket.on('canvasState', (data) => {
     setStateList(data);
     // console.log(data);
