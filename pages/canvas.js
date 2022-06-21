@@ -18,7 +18,7 @@ export default function Home() {
   const [imageData, setImageData] = useState('');
   const [canvascontext, setCanvascontext] = useState('');
   // const [clearCanvas, setClearCanvas] = useState(true);
-  const [stateList, setStateList] = useState([]);
+  const [stateList, setStateList] = useState();
   //  CANVAS FUNCTIONS FOR DRAWING DELETING
   function startDrawing({ nativeEvent }) {
     const { offsetX, offsetY } = nativeEvent;
@@ -31,7 +31,7 @@ export default function Home() {
     setIsDrawing(false);
     const canvas = canvasRef.current;
     const imgData = canvas.toDataURL();
-    socket.emit('canvas', { post: imgData });
+    socket.emit('canvas', imgData, room);
   };
   // const deleteCanvas = () => {
   //   const canvas = canvasRef.current;
@@ -87,12 +87,14 @@ export default function Home() {
   // getting message
   useEffect(() => {
     socket.on('message', (data) => {
+      console.log(data);
       setList([...list, data]);
     });
-    socket.on('canvasState', (data) => {
-      setStateList(data);
-      // console.log(data);
-    });
+  });
+  socket.on('canvasState', (data) => {
+    console.log('hi');
+    setStateList(data);
+    // setRoom(room1);
   });
   socket.on('reconnect_error', (err) => {
     console.log(`connect_error due to ${err.message}`);
@@ -102,8 +104,8 @@ export default function Home() {
     image.onload = function () {
       canvascontext.drawImage(image, 0, 0);
     };
-    // console.log(stateList.post);
-    image.src = stateList.post;
+    // console.log(stateList);
+    image.src = stateList;
   });
   return (
     <>
@@ -122,10 +124,17 @@ export default function Home() {
 
         <button onClick={handleChatpost}>send</button>
 
-        <input />
+        <input value={room} onInput={(e) => setRoom(e.target.value)} />
+        {room}
         <button
           onClick={() => {
-            console.log(imageData);
+            socket.emit(
+              'canvas',
+              'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==',
+              room,
+            );
+            socket.emit('join-room', room);
+            console.log(room);
           }}
         >
           enter room
