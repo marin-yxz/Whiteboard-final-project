@@ -11,20 +11,22 @@ const io = require('socket.io')(
   },
   { maxHttpBufferSize: 1e8, pingTimeout: 60000 },
 );
+
 io.on('connection', (socket) => {
-  // console.log(socket.id);
-  socket.on('chat', function (data) {
-    io.emit('message', data);
+  socket.on('chat', function (data, room) {
+    socket.to(room).emit('message', data);
+    console.log(data);
   });
+
   socket.on('canvas', function (data, room) {
-    console.log(room);
-    if (room === '') {
-      socket.broadcast.emit('canvasState', data);
-    } else {
-      socket.to(room).emit('canvasState', data);
-    }
+    socket.to(room).emit('canvasState', data);
+  });
+  socket.on('leave-room', (room) => {
+    console.log('user left room ' + room);
+    socket.leave(room);
   });
   socket.on('join-room', (room) => {
+    console.log('joined room ' + room);
     socket.join(room);
   });
 });
