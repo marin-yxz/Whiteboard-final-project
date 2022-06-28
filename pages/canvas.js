@@ -1,5 +1,6 @@
 import 'react-perfect-scrollbar/dist/css/styles.css';
 import Head from 'next/head';
+import Link from 'next/link';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { io } from 'socket.io-client';
@@ -26,12 +27,13 @@ const Messages = styled.div`
 const socket = io('http://localhost:8000', {
   transports: ['websocket'],
 });
-export default function Home() {
+export default function Home(props) {
   const [isDrawing, setIsDrawing] = useState(false);
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
   const mainId = useRef('');
   const [canvasstate, setCanvasstate] = useState(false);
+  const [listOfUsers, setListOfUsers] = useState([]);
   const [room, setRoom] = useState('1');
   const [roomlist, setRoomlist] = useState([{ room: '1' }]);
   const [canvascontext, setCanvascontext] = useState('');
@@ -91,7 +93,8 @@ export default function Home() {
       setId(socket.id);
     });
 
-    socket.emit('join-room', room);
+    socket.emit('join-room', room, props.user ? props.user.username : id);
+
     return () => {
       socket.off('connect');
       socket.off('disconnect');
@@ -120,25 +123,28 @@ export default function Home() {
   //  HANDLING POSTING TO SOCKET.IO
   // chat messages
   const handleChatpost = () => {
-    console.log('below is the list');
-
-    socket.emit('chat', { post: name, id: id }, room);
-    setList([...list, { post: name, id: id }]);
+    socket.emit(
+      'chat',
+      { post: name, id: props.user ? props.user.username : id },
+      room,
+    );
+    setList([
+      ...list,
+      { post: name, id: props.user ? props.user.username : id },
+    ]);
   };
   // setting Canvas for other users
 
   // getting message
 
   socket.on('message', (data) => {
-    console.log('this below is the data');
-    console.log(mainId);
-    console.log(data);
     setList([...list, data]);
-    console.log(list);
   });
-
+  socket.on('users', (data) => {
+    console.log('this is the data' + data);
+    setListOfUsers([...listOfUsers, data]);
+  });
   socket.on('canvasState', (data) => {
-    console.log('hi');
     if (canvasstate === true) {
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
@@ -151,9 +157,7 @@ export default function Home() {
   socket.on('reconnect_error', (err) => {
     console.log(`connect_error due to ${err.message}`);
   });
-  socket.on('users', (data) => {
-    console.log(data);
-  });
+
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
       handleChatpost();
@@ -167,7 +171,7 @@ export default function Home() {
       setRoomlist([...roomlist, { room: room }]);
       deleteCanvas();
       setList([]);
-      socket.emit('join-room', room);
+      socket.emit('join-room', room, props.user ? props.user.username : id);
       console.log(room);
     }
   };
@@ -185,7 +189,9 @@ export default function Home() {
         onInput={(e) => setRoom(e.target.value)}
         onKeyDown={handleKeyDown1}
       />
-
+      {props.user && (
+        <Link href="/user/private-profile">{props.user.username}</Link>
+      )}
       <button
         onClick={() => {
           socket.emit(
@@ -197,7 +203,7 @@ export default function Home() {
           const lastRoom = array[array.length - 2].room;
           socket.emit('leave-room', lastRoom);
           setRoomlist([...roomlist, { room: room }]);
-          socket.emit('join-room', room);
+          socket.emit('join-room', room, props.user ? props.user.username : id);
           console.log(room);
           deleteCanvas();
         }}

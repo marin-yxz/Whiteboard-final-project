@@ -4,8 +4,11 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { LoginResponseBody } from './api/login';
 
+type Props = {
+  refreshUserProfile: () => Promise<void>;
+};
 const Main = styled.div``;
-export default function Register(props) {
+export default function Register(props: Props) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<
@@ -33,9 +36,11 @@ export default function Register(props) {
     const returnTo = router.query.returnTo;
     console.log(returnTo);
     if (returnTo && !Array.isArray(returnTo)) {
+      await props.refreshUserProfile();
       await router.push(returnTo);
     } else {
-      await router.push(`/user/${loginResponeBody.user.id}`);
+      await props.refreshUserProfile();
+      await router.push(`/`);
     }
   }
 
@@ -74,7 +79,7 @@ export default function Register(props) {
       >
         Login
       </button>
-      {errors.length &&
+      {errors.length > 0 &&
         errors.map((error) => (
           <div
             style={{ color: 'white', backgroundColor: 'red', padding: '5px' }}

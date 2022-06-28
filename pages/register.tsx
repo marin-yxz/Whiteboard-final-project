@@ -36,11 +36,10 @@ export default function Register() {
     if (returnTo && !Array.isArray(returnTo)) {
       await router.push(returnTo);
     } else {
-      await router.push(`/user/${registerResponeBody.user.id}`);
+      await router.push(`/`);
     }
     // await router.push('/');
   }
-
   return (
     <div>
       <Head>
@@ -76,7 +75,8 @@ export default function Register() {
       >
         Register
       </button>
-      {errors.length &&
+      {/* {errors[0].message ? '0' : errors[0].message} */}
+      {errors.length > 0 &&
         errors.map((error) => (
           <div
             style={{ color: 'white', backgroundColor: 'red', padding: '5px' }}
@@ -85,6 +85,7 @@ export default function Register() {
             {error.message}
           </div>
         ))}
+      {/* {errors.length} */}
     </div>
   );
 }

@@ -22,14 +22,18 @@ function MyApp({ Component, pageProps }) {
   useEffect(() => {
     refreshUserProfile().catch(() => console.log('fetch api failed'));
   }, [refreshUserProfile]);
-  console.log(user);
+  // console.log(user);
   return (
     <Layout user={user}>
       {/*
           The "Component" component refers to
           the current page that is being rendered
         */}
-      <Component {...pageProps} refreshUserProfile={refreshUserProfile} />
+      <Component
+        {...pageProps}
+        user={user}
+        refreshUserProfile={refreshUserProfile}
+      />
     </Layout>
   );
 }

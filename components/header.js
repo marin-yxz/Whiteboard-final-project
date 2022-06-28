@@ -25,7 +25,7 @@ export default function Header(props) {
         <Link href="/">Home</Link>
       </div>
       {props.user && (
-        <Link href="/users/private-profile">{props.user.username}</Link>
+        <Link href="/user/private-profile">{props.user.username}</Link>
       )}
       {props.user ? (
         <a href="/logout">Logout</a>

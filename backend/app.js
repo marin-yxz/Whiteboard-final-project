@@ -17,7 +17,9 @@ io.on('connection', (socket) => {
     socket.to(room).emit('message', data);
     console.log(data);
   });
-
+  socket.on('user', function (data, users) {
+    socket.to(users).emit('userList', data);
+  });
   socket.on('canvas', function (data, room) {
     socket.to(room).emit('canvasState', data);
   });
@@ -25,8 +27,9 @@ io.on('connection', (socket) => {
     console.log('user left room ' + room);
     socket.leave(room);
   });
-  socket.on('join-room', (room) => {
+  socket.on('join-room', (room, data) => {
     console.log('joined room ' + room);
+    socket.to(room).emit('users', data);
     socket.join(room);
   });
 });
