@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { LoginResponseBody } from './api/login';
 
 const Main = styled.div``;
-export default function Register() {
+export default function Register(props) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<

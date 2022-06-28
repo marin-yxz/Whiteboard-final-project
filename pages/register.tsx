@@ -31,7 +31,14 @@ export default function Register() {
     if ('errors' in registerResponeBody) {
       setErrors(registerResponeBody.errors);
     }
-    await router.push('/');
+    const returnTo = router.query.returnTo;
+    console.log(returnTo);
+    if (returnTo && !Array.isArray(returnTo)) {
+      await router.push(returnTo);
+    } else {
+      await router.push(`/user/${registerResponeBody.user.id}`);
+    }
+    // await router.push('/');
   }
 
   return (
