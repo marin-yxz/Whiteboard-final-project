@@ -1,5 +1,4 @@
 import camelcaseKeys from 'camelcase-keys';
-// import { config } from 'dotenv-safe';
 import postgres from 'postgres';
 
 declare module globalThis {

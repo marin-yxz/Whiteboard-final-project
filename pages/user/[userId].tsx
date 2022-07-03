@@ -33,7 +33,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   }
   const user = await getUserById(parseInt(userIdFromUrl));
   console.log(user);
-  if (!user) {
+  if (user === undefined) {
     context.res.statusCode = 404;
     return {
       props: {},

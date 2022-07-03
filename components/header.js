@@ -28,6 +28,7 @@ export default function Header(props) {
         <Link href="/user/private-profile">{props.user.username}</Link>
       )}
       {props.user ? (
+        // eslint-disable-next-line @next/next/no-html-link-for-pages
         <a href="/logout">Logout</a>
       ) : (
         <>

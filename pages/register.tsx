@@ -5,7 +5,11 @@ import styled from 'styled-components';
 import { RegisterResponseBody } from './api/register';
 
 const Main = styled.div``;
-export default function Register() {
+
+type Props = {
+  refreshUserProfile: () => Promise<void>;
+};
+export default function Register(props: Props) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<
@@ -34,8 +38,10 @@ export default function Register() {
     const returnTo = router.query.returnTo;
     console.log(returnTo);
     if (returnTo && !Array.isArray(returnTo)) {
+      await props.refreshUserProfile();
       await router.push(returnTo);
     } else {
+      await props.refreshUserProfile();
       await router.push(`/`);
     }
     // await router.push('/');

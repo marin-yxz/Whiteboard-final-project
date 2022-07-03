@@ -34,12 +34,13 @@ export default function Home(props) {
   const mainId = useRef('');
   const [canvasstate, setCanvasstate] = useState(false);
   const [listOfUsers, setListOfUsers] = useState([]);
-  const [room, setRoom] = useState('1');
+  const [room, setRoom] = useState('0');
   const [roomlist, setRoomlist] = useState([{ room: '1' }]);
   const [canvascontext, setCanvascontext] = useState('');
   const [id, setId] = useState('');
   const [stateList, setStateList] = useState();
   //  CANVAS FUNCTIONS FOR DRAWING DELETING
+  const [isInGame, setIsInGame] = useState(false);
   function startDrawing({ nativeEvent }) {
     const { offsetX, offsetY } = nativeEvent;
     contextRef.current.beginPath();
@@ -76,6 +77,7 @@ export default function Home(props) {
     [isDrawing],
   );
   //  canvas setup and connection to socket
+
   useEffect(() => {
     const canvas = canvasRef.current;
     canvas.width = window.innerWidth * 0.5;
@@ -133,10 +135,6 @@ export default function Home(props) {
       { post: name, id: props.user ? props.user.username : id },
     ]);
   };
-  // setting Canvas for other users
-
-  // getting message
-
   socket.on('message', (data) => {
     setList([...list, data]);
   });
@@ -184,11 +182,16 @@ export default function Home(props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Main>chat</Main>
-      <input
-        value={room}
-        onInput={(e) => setRoom(e.target.value)}
-        onKeyDown={handleKeyDown1}
-      />
+      {!isInGame ? (
+        <input
+          value={room}
+          onInput={(e) => setRoom(e.target.value)}
+          onKeyDown={handleKeyDown1}
+        />
+      ) : (
+        'no'
+      )}
+
       {props.user && (
         <Link href="/user/private-profile">{props.user.username}</Link>
       )}
@@ -205,6 +208,7 @@ export default function Home(props) {
           setRoomlist([...roomlist, { room: room }]);
           socket.emit('join-room', room, props.user ? props.user.username : id);
           console.log(room);
+          setIsInGame(true);
           deleteCanvas();
         }}
       >

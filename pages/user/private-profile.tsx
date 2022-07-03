@@ -9,16 +9,16 @@ export default function PrivateProfile(props: Props) {
   return (
     <div>
       <Head>
-        <title>{props.user.username}</title>
+        <title>{props.user?.username}</title>
         <meta name="description" content="About the app" />
       </Head>
 
       <main>
         <h1>
-          User #{props.user.id} (username: {props.user.username})
+          User #{props.user?.id} (username: {props.user?.username})
         </h1>
-        <div>id: {props.user.id}</div>
-        <div>username: {props.user.username}</div>
+        <div>id: {props.user?.id}</div>
+        <div>username: {props.user?.username}</div>
       </main>
     </div>
   );
@@ -27,7 +27,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   const user = await getUserByValidSessionToken(
     context.req.cookies.sessionToken,
   );
-  console.log('this is the user' + user);
+  console.log(user);
   if (user) {
     return {
       props: {
