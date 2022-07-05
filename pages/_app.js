@@ -31,7 +31,7 @@ function MyApp({ Component, pageProps }) {
         */}
       <Component
         {...pageProps}
-        user={user}
+        // user={user}
         refreshUserProfile={refreshUserProfile}
       />
     </Layout>

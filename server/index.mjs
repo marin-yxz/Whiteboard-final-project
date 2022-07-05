@@ -5,11 +5,19 @@ import _ from 'lodash';
 import next from 'next';
 import * as socketio from 'socket.io';
 
+// import { getUserByValidSessionToken } from '../util/database1.mjs';
+
+// require('typescript-require');
+// const http = require('node:http');
+// const express = require('express');
+// const _ = require('lodash');
+// const next = require('next');
+// const socketio = require('socket.io');
+// const getUserByValidSessionToken = require('../util/database1.mjs');
 const port = parseInt(process.env.PORT || '3000', 10);
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
 const nextHandler = nextApp.getRequestHandler();
-
 nextApp
   .prepare()
   .then(async () => {
@@ -31,13 +39,16 @@ nextApp
         // const clients = io.sockets.adapter.rooms.get(room);
         // console.log('first client', socketsinRoom[0].id);
       });
-      socket.on('join-room', async (room, user, state) => {
+      socket.on('join-room', async (room, user, state, session) => {
+        console.log('my user ', user);
+        // const validUser = await getUserByValidSessionToken(session);
+        // console.log('valid user :', validUser);
         const clients = io.sockets.adapter.rooms.get(room);
-        console.log(_.size(clients));
+
         await socket.join(room);
         if (_.size(clients) === 0 && !state) {
           socket.nsp.to(room).emit('room', user);
-          console.log('hallo' + socket.id);
+
           socket.nsp.to(socket.id).emit('firstPlayer', true);
         } else {
           socket.nsp.to(room).emit('room', user);
@@ -50,19 +61,44 @@ nextApp
         // console.log(io.of('/').adapter.rooms['2']);
         console.log(io.sockets.adapter.rooms.get(room));
       });
-      socket.on('turnState', (state, room) => {
+      socket.on('turnState', (state, room, turn) => {
+        console.log('who sent it ', socket.id);
         console.log(state, room);
+        console.log('starting state', state);
         const clients = io.sockets.adapter.rooms.get(room);
-        for (const clientId of clients) {
-          if (socket.id === io.sockets.sockets.get(clientId).id) {
-            socket.to(socket.id).emit('turn', false);
-            console.log('succes');
-          } else {
-            return console.log(io.sockets.sockets.get(clientId).id);
-          }
-          // const clientSocket = io.sockets.sockets.get(clientId).id;
-          // console.log()
+        console.log(clients);
+        if (state === true) {
+          console.log('ive got the state');
+          socket.nsp
+            .to(socket.id)
+            .emit('turn', { turn: true, firstPlayer: false });
+          console.log(Date.now());
+          socket.nsp.to(room).emit('counter', {
+            dateNow: Date.now(),
+            datePlus30sec: Date.now() + 5 * 1000,
+          });
         }
+        // for (const clientId of clients) {
+        //   if (turn) {
+        //     // console.log('who sent it', clientId);
+        //     socket.nsp
+        //       .to(io.sockets.sockets.get(clientId).id)
+        //       .emit('turn', { turn: false, firstPlayer: false });
+        //   } else {
+        //     console.log('next player', io.sockets.sockets.get(clientId).id);
+        //     socket.nsp
+        //       .to(io.sockets.sockets.get(clientId).id)
+        //       .emit('turn', { turn: true, firstPlayer: false });
+        //     socket.nsp.to(room).emit('counter', {
+        //       dateNow: Date.now(),
+        //       datePlus30sec: Date.now() + 5 * 1000,
+        //     });
+        //     return;
+        //   }
+
+        //   // const clientSocket = io.sockets.sockets.get(clientId).id;
+        //   // console.log()
+        // }
       });
       socket.on('message', (msg, room) => {
         socket.to(room).emit('msg', msg);

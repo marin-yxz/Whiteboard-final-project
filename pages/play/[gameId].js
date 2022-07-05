@@ -17,16 +17,17 @@ export default function Home(props) {
   const [receievedMessages, setReceievedMessages] = useState([]);
   const canvasRef = useRef(null);
   const contextRef = useRef(null);
-  const [drawing, setDrawing] = useState(0);
   const [players, setPlayers] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false); // state to track when user clicks to draw
   const [firstPlayer, setFirstPlayer] = useState(false);
   const [turn, setTurn] = useState(false);
+  const [counter, setCounter] = useState(0);
   // INITALIZE SOCKET AND HANDLING ALL RESPONSES FROM SOCKET IF CONNECTED
+  // console.log(props.user.username);
   useEffect(() => {
     const canvas = canvasRef.current;
-    canvas.width = window.innerWidth * 0.5;
-    canvas.height = window.innerHeight * 0.8;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     canvas.style = `${window.innerWidth}px`;
     canvas.style = `${window.innerHeight}px`;
     const context = canvas.getContext('2d');
@@ -49,7 +50,6 @@ export default function Home(props) {
     contextRef.current.moveTo(offsetX, offsetY);
     setIsDrawing(true);
   }
-
   const draw = useCallback(
     ({ nativeEvent }) => {
       if (!isDrawing) {
@@ -62,61 +62,105 @@ export default function Home(props) {
     [isDrawing],
   );
   useEffect(() => {
-    if (props.user) {
-      socket.on('connect', () => {});
-      socket.on('status', (data) => {
-        console.log(data);
-      });
-
-      socket.emit(
-        'join-room',
-        props.link.gameId,
-        props.user.username,
-        firstPlayer,
-      );
-      socket.on('msg', (msg) => {
-        setReceievedMessages([...receievedMessages, msg]);
-        console.log(receievedMessages);
-        console.log('this is the message', msg);
-      });
-    }
-  }, [props.user, props.link]);
-
-  socket.on('firstPlayer', (turn) => {
-    setFirstPlayer(turn);
-    console.log(turn);
-  });
-  // useEffect(() => {
-  //   socket.on('msg', (msg) => {
-  //     setReceievedMessages([...receievedMessages, msg]);
-  //     console.log(receievedMessages);
-  //     console.log('this is the message', msg);
-  //   });
-  // }, []);
+    socket.on('connect', () => {});
+  }, []);
+  useEffect(() => {
+    console.log('up');
+    socket.emit(
+      'join-room',
+      props.link.gameId,
+      props.user.username,
+      firstPlayer,
+      props.session,
+    );
+  }, []);
   useEffect(() => {
     socket.on('room', (user) => {
-      setPlayers([...players, user]);
-    });
-    console.log(players);
-  }, [players]);
+      console.log(user);
 
+      setPlayers((previousState) => {
+        const newState = [...previousState, user];
+        return newState;
+      });
+    });
+  }, []);
+  useEffect(() => {
+    socket.on('firstPlayer', (turn1) => {
+      setFirstPlayer(turn1);
+    });
+  }, [firstPlayer]);
+  useEffect(() => {
+    socket.on('msg', (msg) => {
+      setReceievedMessages((previousState) => {
+        const newState = [...previousState, msg];
+        return newState;
+      });
+    });
+  }, []);
   useEffect(() => {
     socket.on('canvasData', (canvas) => {
       const canvas1 = canvasRef.current;
       const context = canvas1.getContext('2d');
       const image = new Image();
       image.onload = function () {
-        context.drawImage(image, 0, 0);
+        context.drawImage(
+          image,
+          0,
+          0,
+          image.width,
+          image.height,
+          0,
+          0,
+          canvas1.width,
+          canvas1.height,
+        );
       };
-
       image.src = canvas;
     });
-  }, [receievedMessages]);
-  function dof() {
-    socket.emit('message', props.user.username, props.link.gameId);
-  }
+  }, []);
+  useEffect(() => {
+    socket.on('turn', (data) => {
+      console.log(data);
+      setFirstPlayer(data.firstPlayer);
+
+      setTurn(data.turn);
+    });
+  }, []);
+  useEffect(() => {
+    socket.on('counter', (data) => {
+      setCounter((data.datePlus30sec - data.dateNow) / 1000);
+    });
+  }, []);
+  const x = function (player_turn) {
+    if (player_turn) {
+      return true;
+    }
+  };
+  useEffect(() => {
+    console.log(turn);
+    if (counter === 0) {
+      if (turn) {
+        socket.emit('turnState', false, props.link.gameId, turn);
+        return;
+      } else {
+        return;
+      }
+    }
+
+    // save intervalId to clear the interval when the
+    // component re-renders
+    const intervalId = setInterval(() => {
+      setCounter(counter - 1);
+    }, 1000);
+
+    // clear interval on re-render to avoid memory leaks
+    return () => clearInterval(intervalId);
+    // add timeLeft as a dependency to re-rerun the effect
+    // when we update it
+  }, [counter, turn]);
+  useEffect(() => {});
   function sendState() {
-    socket.emit('turnState', firstPlayer, props.link.gameId);
+    socket.emit('turnState', firstPlayer, props.link.gameId, turn);
   }
   function sendMessageToChat() {
     setReceievedMessages([
@@ -156,13 +200,7 @@ export default function Home(props) {
       >
         send message {sendingMessage}
       </button>
-      <button
-        onClick={() => {
-          dof();
-        }}
-      >
-        send
-      </button>
+      {counter ? <div>{counter}</div> : ''}
       {firstPlayer ? (
         <button
           onClick={() => {
@@ -174,15 +212,6 @@ export default function Home(props) {
       ) : (
         <div>waiting for first player to start</div>
       )}
-      {receievedMessages.map((Chat) => {
-        return (
-          <div key={Chat.username + ':' + Chat.message + Chat.timestamp}>
-            <div>
-              {Chat.username}:{Chat.message}
-            </div>
-          </div>
-        );
-      })}
       {players.map((player) => {
         return (
           <div key={player}>
@@ -190,16 +219,37 @@ export default function Home(props) {
           </div>
         );
       })}
+      {receievedMessages.map((Chat) => {
+        return (
+          <div
+            style={{ backgroundColor: 'red' }}
+            key={Chat.username + ':' + Chat.message + Chat.timestamp}
+          >
+            <div>
+              {Chat.username}:{Chat.message}
+            </div>
+          </div>
+        );
+      })}
+
       <canvas
+        style={{ pointerEvents: 'none', display: 'block' }}
         onMouseDown={(nativeEvent) => {
-          startDrawing(nativeEvent);
+          if (turn) {
+            startDrawing(nativeEvent);
+          }
         }}
         onMouseUp={(nativeEvent) => {
-          finishDrawing(nativeEvent);
+          if (turn) {
+            finishDrawing(nativeEvent);
+          }
         }}
-        onMouseMove={draw}
+        onMouseMove={(nativeEvent) => {
+          draw(nativeEvent);
+        }}
         ref={canvasRef}
       />
+
       <Main>chat</Main>
     </div>
   );
@@ -214,6 +264,7 @@ export async function getServerSideProps(context) {
       props: {
         link: gameUrl,
         user: user,
+        session: context.req.cookies.sessionToken,
       },
     };
   }

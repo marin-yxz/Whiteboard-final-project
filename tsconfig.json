@@ -2,11 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "UpLeveled Node + React TSConfig",
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "target": "es2015",
     "moduleResolution": "node",
@@ -16,6 +12,7 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "downlevelIteration": true,
+    "noImplicitAny": false,
     "forceConsistentCasingInFileNames": true,
     "jsx": "preserve",
     "noEmit": true,
@@ -32,10 +29,8 @@
     "**/*.js",
     "**/*.jsx",
     "**/*.cjs",
-    "**/*.mjs"
+    "**/*.mjs",
+    "server/indexjs"
   ],
-  "exclude": [
-    "node_modules",
-    "build"
-  ]
+  "exclude": ["node_modules", "build"]
 }
