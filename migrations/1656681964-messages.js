@@ -4,7 +4,7 @@ exports.up = async (sql) => {
 		room_id integer REFERENCES rooms (id) ON DELETE CASCADE,
 		user_id integer REFERENCES users (id) ON DELETE CASCADE,
 		messages TEXT,
-		time integer NOT NULL
+		time TIMESTAMP NOT NULL
   )`;
 };
 exports.down = async (sql) => {

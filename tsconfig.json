@@ -29,8 +29,7 @@
     "**/*.js",
     "**/*.jsx",
     "**/*.cjs",
-    "**/*.mjs",
-    "server/indexjs"
+    "**/*.mjs"
   ],
   "exclude": ["node_modules", "build"]
 }

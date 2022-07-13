@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon ./server/index.mjs",
+    "dev": "next dev",
     "build": "next build",
     "start": "SET NODE_ENV=development & npx ts-node-esm ./server/index.ts",
     "lint": "next lint",
     "migrate": "dotenv ley",
+    "mi5": "yarn migrate down && yarn migrate down  && yarn migrate down  && yarn migrate down  && yarn migrate down &&  yarn migrate down && yarn migrate down && yarn migrate up",
     "heroku-postbuild": "yarn migrate up && yarn build"
   },
   "dependencies": {

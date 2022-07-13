@@ -1,6 +1,10 @@
+import { NextApiRequest, NextApiResponse } from 'next';
 import { getUserByValidSessionToken } from '../../util/database';
 
-export default async function handler(req, res) {
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method === 'GET') {
     // 1. Get the cookie from the request
     const token = req.cookies.sessionToken;
@@ -23,10 +27,8 @@ export default async function handler(req, res) {
     }
 
     // 3. Return the user
-    res
-      .status(200)
-      // Tells the browser to create the cookie for us
-      .json({ user: user });
+    res.status(200);
+    // Tells the browser to create the cookie for us
   } else {
     res.status(405).json({ errors: [{ message: 'method not allowed' }] });
   }
