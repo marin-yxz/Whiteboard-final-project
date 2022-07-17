@@ -2423,6 +2423,11 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
+doodle.css@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/doodle.css/-/doodle.css-0.0.2.tgz#163be50ee8fc81ac1426fa02ea5ebb0553990207"
+  integrity sha512-WHIPpiPAG+GgdSOu9tSfRisvSCClEobSMKZ2JmvbawKKO9aff2SIhlZC0w3nE8/k+kph1NS8tON+3VJiUpl1oA==
+
 dot-prop@^5.2.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/dot-prop/-/dot-prop-5.3.0.tgz#90ccce708cd9cd82cc4dc8c3ddd9abdd55b20e88"

@@ -5,8 +5,10 @@ import {
   addMessagesAndReturnAllMessages,
   addtToScore,
   createRoomifNotExistAndJoin,
+  deleteScore,
   deleteUserFromRoomIfDisconnect,
   displayScore,
+  firstPlayerAfterRounds,
   getMessagesInRoom,
   getUserById,
   getUserByValidSessionToken,
@@ -26,6 +28,7 @@ const SocketHandler = (req, res) => {
     const io = new Server(res.socket.server);
     res.socket.server.io = io;
     io.on('connection', (socket) => {
+      console.log(socket);
       socket.on('input-change', (msg, room) => {
         socket.to(room).emit('update-input', msg);
       });
@@ -33,9 +36,7 @@ const SocketHandler = (req, res) => {
         const roomId = await deleteUserFromRoomIfDisconnect(socket.id);
         console.log('disconnected ', roomId);
         const usersInRoom = await getUsersInRoomById(roomId[0].room_id);
-
         const userWhoDisconnected = await getUserById(roomId[0].user_id);
-
         const firsyplayerStatus = await addFirstPlayerIfFirstPlayerDisconnects(
           roomId,
           userWhoDisconnected.username,
@@ -74,10 +75,24 @@ const SocketHandler = (req, res) => {
       socket.on('activeplayer', async (token, room) => {
         const user = await getUserByValidSessionToken(token);
         const activeplayer = await setGameState(room, user.username);
-        socket.nsp.to(room).emit('game', activeplayer[0].active_player_id, 10);
-        socket.nsp
-          .to(activeplayer[0].socketid)
-          .emit('word', activeplayer[0].word);
+        console.log('my userse:', activeplayer);
+        if (activeplayer[0].rounds === 1) {
+          const player = await firstPlayerAfterRounds(room);
+          console.log(player);
+          const usersInRoom = await getUsersInRoom(room);
+          const messages = await getMessagesInRoom(room);
+          await deleteScore(room);
+          const score = await displayScore(room);
+          socket.nsp.to(room).emit('score', score);
+          socket.nsp.to(player).emit('room', usersInRoom, messages, true);
+        } else {
+          socket.nsp
+            .to(room)
+            .emit('game', activeplayer[0].active_player_id, 10);
+          socket.nsp
+            .to(activeplayer[0].socketid)
+            .emit('word', activeplayer[0].word);
+        }
       });
       socket.on('send-message', async (info, room) => {
         const date = new Date();
@@ -85,6 +100,8 @@ const SocketHandler = (req, res) => {
         const correct = await nextPlayerIfWordGuessed(info.message, room);
         console.log('correct', correct);
         if (correct) {
+          // const activeplayer = await setGameState(room, user.username);
+          // console.log('my userse:', activeplayer);
           await addtToScore(user);
           const score = await displayScore(room);
           socket.nsp.to(room).emit('score', score);

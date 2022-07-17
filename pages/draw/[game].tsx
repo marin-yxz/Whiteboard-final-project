@@ -1,34 +1,86 @@
+import 'doodle.css/doodle.css';
 import { GetServerSidePropsContext } from 'next';
+import Image2 from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import io from 'socket.io-client';
 import styled from 'styled-components';
+import logo from '../../public/pen.gif';
 import { getUserByValidSessionToken } from '../../util/database';
 
 let socket;
 const Chat = styled.div`
-  height: 80vh;
+  /* height: 80vh; */
+  margin-left: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 `;
 const DivContainer = styled.div`
+  @import url('https://fonts.googleapis.com/css2?family=Short+Stack&display=swap');
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   width: 100vw;
   height: 100vh;
   max-width: 100vw;
-  max-height: 100vh;
-  justify-content: space-between;
+  max-height: 96vh;
+  font-family: 'Short Stack', cursive;
+  /* justify-content: space-between; */
   padding-left: 10%;
   padding-right: 10%;
   background-image: url('/background.jpg');
 `;
 const Messages = styled.div`
-  background-color: #80ced7;
+  /* background-color: #80ced7; */
   border-radius: 2px;
   overflow-y: scroll;
   height: 90%;
   ::-webkit-scrollbar {
     display: none;
   }
-  /* max-height: 70vh; */
+  max-height: 70vh;
+`;
+const MainDiv = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+const CanvasAndChat = styled.div`
+  /* background-color: white; */
+
+  display: flex;
+  justify-content: center;
+`;
+const PlayerDiv = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  height: 70px;
+  width: 200px;
+  padding-left: 20px;
+  padding-right: 20px;
+  align-items: center;
+`;
+const ButtonDiv = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+const WordDiv = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+`;
+const ContainingDiv = styled.div`
+  border-radius: 6px;
+`;
+const CounterDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
 `;
 export default function Home(props) {
   const [input, setInput] = useState('');
@@ -201,91 +253,113 @@ export default function Home(props) {
   };
   return (
     <DivContainer>
-      <div style={{ backgroundColor: 'white' }}>
-        {word}
-        {counter}
+      <ContainingDiv className="doodle">
         {firstPlayer && (
-          <button
-            onClick={() => {
-              socket.emit('activeplayer', props.token, props.room);
-            }}
-          >
-            start the game
-          </button>
+          <ButtonDiv>
+            <button
+              style={{ cursor: 'pointer' }}
+              onClick={() => {
+                socket.emit('activeplayer', props.token, props.room);
+              }}
+            >
+              start the game
+            </button>
+          </ButtonDiv>
         )}
-        {user.map((userInroom, index) => {
-          return (
+        <CounterDiv>{counter}</CounterDiv>
+        <WordDiv>{word}</WordDiv>
+        <MainDiv>
+          <div>
+            {user.map((userInroom, index) => {
+              return (
+                <PlayerDiv
+                  className="doodle-border"
+                  // style={{
+                  //   backgroundColor:
+                  //     userInroom.user_name === activePlayerusername
+                  //       ? 'blue'
+                  //       : 'red',
+                  // }}
+                  key={userInroom.user_name}
+                >
+                  {userInroom.user_name}
+                  {userInroom.user_name === activePlayerusername && (
+                    <div style={{ height: '50px', width: '50px' }}>
+                      <Image2 src={logo} alt="yo" />
+                    </div>
+                  )}
+                </PlayerDiv>
+              );
+            })}
+            {score.map((user) => {
+              return (
+                <div
+                  // style={{ backgroundColor: 'white' }}
+                  key={user.user_name}
+                >
+                  {user.user_name}:{user.score}
+                </div>
+              );
+            })}
+          </div>
+          <CanvasAndChat>
             <div
               style={{
-                backgroundColor:
-                  userInroom.user_name === activePlayerusername
-                    ? 'blue'
-                    : 'red',
+                // border: '1px solid black',
+                width: '50vw',
+                cursor: 'crosshair',
+                height: '100%',
               }}
-              key={userInroom.user_name}
             >
-              {userInroom.user_name}
-            </div>
-          );
-        })}
-        {score.map((user) => {
-          return (
-            <div style={{ backgroundColor: 'white' }} key={user.user_name}>
-              {user.user_name}:{user.score}
-            </div>
-          );
-        })}
-      </div>
-      <div
-        style={{
-          border: '1px solid black',
-          width: '50vw',
-          cursor: 'crosshair',
-          height: '80vh',
-        }}
-      >
-        <canvas
-          style={{ pointerEvents: 'none', display: 'block' }}
-          onMouseDown={(nativeEvent) => {
-            if (activePlayerusername === props.user) {
-              startDrawing(nativeEvent);
-            }
-          }}
-          onMouseUp={() => {
-            if (activePlayerusername === props.user) {
-              finishDrawing();
-            }
-          }}
-          onMouseMove={(nativeEvent) => {
-            draw(nativeEvent);
-          }}
-          ref={canvasRef}
-        />
-      </div>
-      <Chat>
-        <Messages>
-          <PerfectScrollbar>
-            {receievedMessage.map((message, index) => (
-              <div
-                key={message.time}
-                style={{
-                  backgroundColor: index % 2 === 0 ? '#80ced7' : '#007ea7',
+              <canvas
+                className="border"
+                style={{ pointerEvents: 'none', display: 'block' }}
+                onMouseDown={(nativeEvent) => {
+                  if (activePlayerusername === props.user) {
+                    startDrawing(nativeEvent);
+                  }
                 }}
-              >
-                {message.user_name} :{message.messages}
-              </div>
-            ))}
-          </PerfectScrollbar>
-        </Messages>
-        <input
-          placeholder="Type something"
-          value={sendingMessage}
-          onInput={(e) =>
-            setSendingMessage((e.target as HTMLInputElement).value)
-          }
-          onKeyDown={handleKeyDown}
-        />
-      </Chat>
+                onMouseUp={() => {
+                  if (activePlayerusername === props.user) {
+                    finishDrawing();
+                  }
+                }}
+                onMouseMove={(nativeEvent) => {
+                  draw(nativeEvent);
+                }}
+                ref={canvasRef}
+              />
+            </div>
+            <Chat className="border">
+              <Messages className="border">
+                <PerfectScrollbar>
+                  {receievedMessage.map((message, index) => (
+                    <div
+                      className="border"
+                      key={message.time}
+                      style={{
+                        backgroundColor:
+                          index % 2 === 0 ? '#FDF7F1' : '#007ea7',
+                        borderRadius: '7px',
+                      }}
+                    >
+                      {message.user_name} :{message.messages}
+                    </div>
+                  ))}
+                </PerfectScrollbar>
+              </Messages>
+              <input
+                placeholder="Type here!"
+                value={sendingMessage}
+                onInput={(e) =>
+                  setSendingMessage((e.target as HTMLInputElement).value)
+                }
+                onKeyDown={handleKeyDown}
+              />
+            </Chat>
+          </CanvasAndChat>
+        </MainDiv>
+      </ContainingDiv>
     </DivContainer>
   );
 }

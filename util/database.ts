@@ -138,11 +138,12 @@ export async function deleteExpiredSessions() {
   `;
   return sessions.map((session) => camelcaseKeys(session));
 }
-export async function getUsersInRoom(room: number) {
+export async function getUsersInRoom(room: string) {
   let users = await sql`
   SELECT
   users.id as user_id,
-  users.username as user_name
+  users.username as user_name,
+  socket_id
 FROM
   users,
   rooms,
@@ -272,14 +273,22 @@ export async function setTheFirstPlayer(room_id: string, firstPlayer: string) {
   SELECT id FROM rooms WHERE name=${room_id};
   `;
   await sql`
-  INSERT INTO  games(room_id,firstPlayer) VALUES(${roomid[0].id},${firstPlayer})`;
+  INSERT INTO  games(room_id,firstPlayer,rounds) VALUES(${roomid[0].id},${firstPlayer},0)`;
 }
 
-async function activePlayer(user, word, date, room) {
-  const activeplayer = await sql`
-  UPDATE games SET active_player_id=${user}, firstPlayer='',word=${word},start_game_endTime=${date} WHERE room_id=${room} RETURNING active_player_id,word
-    `;
-  return activeplayer;
+async function activePlayer(user, word, date, room, lastPlayer) {
+  console.log(lastPlayer, 'last player');
+  if (lastPlayer) {
+    const activeplayer = await sql`
+    UPDATE games SET active_player_id=${user}, rounds=rounds+1,firstPlayer='',word=${word},start_game_endTime=${date} WHERE room_id=${room} RETURNING active_player_id,word,rounds
+      `;
+    return activeplayer;
+  } else {
+    const activeplayer = await sql`
+    UPDATE games SET active_player_id=${user},firstPlayer='',word=${word},start_game_endTime=${date} WHERE room_id=${room} RETURNING active_player_id,word,rounds
+      `;
+    return activeplayer;
+  }
 }
 async function findSocketFromPlayerName(name) {
   const playerId = await sql`
@@ -322,12 +331,13 @@ export async function setGameState(room_id: string, active_player_id: string) {
   const newdate = addSeconds(date, 30);
   if (first[0].firstplayer !== '') {
     const socketid = await findSocketFromPlayerName(active_player_id);
-
+    const lastPlayer = false;
     const activeplayer = await activePlayer(
       active_player_id,
       randomWord[0].word,
       newdate.toISOString(),
       roomid[0].id,
+      lastPlayer,
     );
     activeplayer[0].socketid = socketid;
 
@@ -338,12 +348,13 @@ export async function setGameState(room_id: string, active_player_id: string) {
     });
     if (index === users.length - 1) {
       const socketid = await findSocketFromPlayerName(users[0].user_name);
-
+      const lastPlayer = true;
       const activeplayer = await activePlayer(
         users[0].user_name,
         randomWord[0].word,
         newdate.toISOString(),
         roomid[0].id,
+        lastPlayer,
       );
       activeplayer[0].socketid = socketid;
       return activeplayer;
@@ -351,12 +362,13 @@ export async function setGameState(room_id: string, active_player_id: string) {
       const socketid = await findSocketFromPlayerName(
         users[index + 1].user_name,
       );
-
+      const lastPlayer = false;
       const activeplayer = await activePlayer(
         users[index + 1].user_name,
         randomWord[0].word,
         newdate.toISOString(),
         roomid[0].id,
+        lastPlayer,
       );
       activeplayer[0].socketid = socketid;
       return activeplayer;
@@ -420,12 +432,13 @@ WHERE
     });
     if (index === users.length - 1) {
       const socketid = await findSocketFromPlayerName(users[0].user_name);
-
+      const lastPlayer = false;
       const activeplayer = await activePlayer(
         users[0].user_name,
         randomWord[0].word,
         newdate.toISOString(),
         roomid[0].id,
+        lastPlayer,
       );
       activeplayer[0].socketid = socketid;
       return activeplayer;
@@ -433,12 +446,13 @@ WHERE
       const socketid = await findSocketFromPlayerName(
         users[index + 1].user_name,
       );
-
+      const lastPlayer = false;
       const activeplayer = await activePlayer(
         users[index + 1].user_name,
         randomWord[0].word,
         newdate.toISOString(),
         roomid[0].id,
+        lastPlayer,
       );
       activeplayer[0].socketid = socketid;
       return activeplayer;
@@ -446,8 +460,6 @@ WHERE
   } else {
     return false;
   }
-  // console.log('word', word);
-  // return word[0].word === message;
 }
 export async function scoreInsert(room_id, username) {
   const roomid = await sql`
@@ -489,4 +501,23 @@ WHERE
   user_games_scores.game_id=${gamesId[0].id}
   `;
   return scores;
+}
+export async function firstPlayerAfterRounds(room_id: string) {
+  const users = await getUsersInRoom(room_id);
+  const roomid = await sql`
+  SELECT id FROM rooms WHERE name=${room_id};
+  `;
+  console.log(users);
+  await sql`
+    UPDATE games SET firstPlayer=${users[0].user_name},rounds=0 WHERE room_id=${roomid[0].id}`;
+  return users[0].socket_id;
+}
+export async function deleteScore(room_id) {
+  const roomid = await sql`
+  SELECT id FROM rooms WHERE name=${room_id};
+  `;
+  const gamesId = await sql`
+    SELECT id FROM games WHERE room_id=${roomid[0].id}`;
+  await sql`
+    UPDATE user_games_scores SET score=0 WHERE game_id=${gamesId[0].id}`;
 }
