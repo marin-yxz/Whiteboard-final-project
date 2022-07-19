@@ -86,15 +86,19 @@ let drawingInterval;
 export default function Home(props) {
   const [input, setInput] = useState('');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const contextRef = useRef(null);
+  const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const [firstPlayer, setFirstPlayer] = useState<boolean>();
   const [activePlayer, setActivePlayer] = useState<boolean>();
   const [activePlayerusername, setActivePlayerusername] = useState<string>();
   const [user, setUser] = useState<{ user_name: string; score: number }[]>([]);
   const [counter, setCounter] = useState<number>();
   const [sendingMessage, setSendingMessage] = useState<string>('');
-  const [score, setScore] = useState([]);
-  const [displayEndScore, setDisplayEndScore] = useState([]);
+  const [score, setScore] = useState<{ user_name: string; score: number }[]>(
+    [],
+  );
+  const [displayEndScore, setDisplayEndScore] = useState<
+    { user_name: string; score: number }[]
+  >([]);
   const [receievedMessage, setReceievedMessage] = useState<
     { user_id: number; user_name: string; messages: string; time: string }[]
   >([]);
@@ -105,8 +109,9 @@ export default function Home(props) {
     if (canvas) {
       canvas.width = window.innerWidth * 0.5;
       canvas.height = window.innerHeight * 0.8;
-      canvas.style = `${window.innerWidth}px`;
-      canvas.style = `${window.innerHeight}px`;
+
+      (canvas.style as any) = `${window.innerWidth}px`;
+      (canvas.style as any) = `${window.innerHeight}px`;
       const context = canvas.getContext('2d');
       if (context) {
         context.lineCap = 'round';
@@ -119,10 +124,12 @@ export default function Home(props) {
     }
   }, []);
   const finishDrawing = () => {
-    contextRef.current.closePath();
-    setIsDrawing(false);
-    clearInterval(drawingInterval);
-    drawingInterval = null;
+    if (contextRef.current) {
+      contextRef.current.closePath();
+      setIsDrawing(false);
+      clearInterval(drawingInterval);
+      drawingInterval = null;
+    }
   };
   function startDrawing({ nativeEvent }) {
     const { offsetX, offsetY } = nativeEvent;
@@ -184,6 +191,7 @@ export default function Home(props) {
         setInput(msg);
       });
       socket.on('game', (activeplayer, time) => {
+        console.log(activePlayer);
         if (props.user === activeplayer) {
           setActivePlayer(true);
           setFirstPlayer(false);
@@ -211,6 +219,7 @@ export default function Home(props) {
         }
       });
       socket.on('score', (scoreSocket) => {
+        console.log(scoreSocket, 'my scores');
         setScore(scoreSocket);
       });
       socket.on('word', (wordFromSocket) => {
@@ -283,7 +292,7 @@ export default function Home(props) {
         <WordDiv>{word}</WordDiv>
         <MainDiv>
           <div>
-            {user.map((userInroom, index) => {
+            {user.map((userInroom) => {
               return (
                 <PlayerDiv className="doodle-border" key={userInroom.user_name}>
                   {userInroom.user_name}
@@ -296,10 +305,10 @@ export default function Home(props) {
               );
             })}
             <h5>CURRENT SCORE:</h5>
-            {score.map((user) => {
+            {score.map((score_user) => {
               return (
-                <div key={user.user_name}>
-                  {user.user_name}:{user.score}
+                <div key={score_user.user_name}>
+                  {score_user.user_name}:{score_user.score}
                 </div>
               );
             })}
