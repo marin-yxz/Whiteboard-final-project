@@ -5,8 +5,9 @@ import { config } from 'dotenv-safe';
 import postgres from 'postgres';
 import setPostgresDefaultsOnHeroku from './setPostgresDefaultsOnHeroku';
 
-config();
 setPostgresDefaultsOnHeroku();
+config();
+
 declare module globalThis {
   let postgresSqlClient: ReturnType<typeof postgres> | undefined;
 }
