@@ -82,6 +82,7 @@ const CounterDiv = styled.div`
   align-items: center;
   font-size: 30px;
 `;
+let drawingInterval;
 export default function Home(props) {
   const [input, setInput] = useState('');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -93,6 +94,7 @@ export default function Home(props) {
   const [counter, setCounter] = useState<number>();
   const [sendingMessage, setSendingMessage] = useState<string>('');
   const [score, setScore] = useState([]);
+  const [displayEndScore, setDisplayEndScore] = useState([]);
   const [receievedMessage, setReceievedMessage] = useState<
     { user_id: number; user_name: string; messages: string; time: string }[]
   >([]);
@@ -119,11 +121,8 @@ export default function Home(props) {
   const finishDrawing = () => {
     contextRef.current.closePath();
     setIsDrawing(false);
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const imgData = canvas.toDataURL();
-      socket.emit('send-canvas', props.token, imgData, props.room);
-    }
+    clearInterval(drawingInterval);
+    drawingInterval = null;
   };
   function startDrawing({ nativeEvent }) {
     const { offsetX, offsetY } = nativeEvent;
@@ -131,6 +130,15 @@ export default function Home(props) {
       contextRef.current.beginPath();
       contextRef.current.moveTo(offsetX, offsetY);
       setIsDrawing(true);
+    }
+    const canvas = canvasRef.current;
+    if (!drawingInterval) {
+      drawingInterval = setInterval(() => {
+        if (canvas) {
+          const imgData = canvas.toDataURL();
+          socket.emit('send-canvas', props.token, imgData, props.room);
+        }
+      }, 100);
     }
   }
   const draw = useCallback(
@@ -148,6 +156,7 @@ export default function Home(props) {
   );
   useEffect(() => {
     if (counter === 0) {
+      finishDrawing();
       if (activePlayerusername === props.user) {
         socket.emit('activeplayer', props.token, props.room);
         setWord('');
@@ -186,6 +195,10 @@ export default function Home(props) {
       socket.on('message', (messageInfo) => {
         setReceievedMessage(messageInfo);
         socket.on('disconnect', () => {});
+      });
+      socket.on('end-score', (scores) => {
+        console.log('IM EXPECTING SCORES', scores);
+        setDisplayEndScore(scores);
       });
       socket.on('room', (users, messages, firstPlayerFromSocket) => {
         setUser(users);
@@ -272,16 +285,7 @@ export default function Home(props) {
           <div>
             {user.map((userInroom, index) => {
               return (
-                <PlayerDiv
-                  className="doodle-border"
-                  // style={{
-                  //   backgroundColor:
-                  //     userInroom.user_name === activePlayerusername
-                  //       ? 'blue'
-                  //       : 'red',
-                  // }}
-                  key={userInroom.user_name}
-                >
+                <PlayerDiv className="doodle-border" key={userInroom.user_name}>
                   {userInroom.user_name}
                   {userInroom.user_name === activePlayerusername && (
                     <div style={{ height: '50px', width: '50px' }}>
@@ -291,13 +295,19 @@ export default function Home(props) {
                 </PlayerDiv>
               );
             })}
+            <h5>CURRENT SCORE:</h5>
             {score.map((user) => {
               return (
-                <div
-                  // style={{ backgroundColor: 'white' }}
-                  key={user.user_name}
-                >
+                <div key={user.user_name}>
                   {user.user_name}:{user.score}
+                </div>
+              );
+            })}
+            <h5>FINAL SCORE:</h5>
+            {displayEndScore.map((scores) => {
+              return (
+                <div key={scores.user_name}>
+                  {scores.user_name}:{scores.score}
                 </div>
               );
             })}
@@ -305,7 +315,6 @@ export default function Home(props) {
           <CanvasAndChat>
             <div
               style={{
-                // border: '1px solid black',
                 width: '50vw',
                 cursor: 'crosshair',
                 height: '100%',

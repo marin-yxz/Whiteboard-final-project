@@ -1,10 +1,16 @@
+import 'doodle.css/doodle.css';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import styled from 'styled-components';
 import { RegisterResponseBody } from './api/register';
 
-const Main = styled.div``;
+const Main = styled.div`
+  @import url('https://fonts.googleapis.com/css2?family=Short+Stack&display=swap');
+  height: 100%;
+  width: 100%;
+  background-color: 'white';
+`;
 
 type Props = {
   refreshUserProfile: () => Promise<void>;
@@ -47,13 +53,13 @@ export default function Register(props: Props) {
     // await router.push('/');
   }
   return (
-    <div>
+    <Main className="doodle" style={{ backgroundColor: 'white' }}>
       <Head>
         <title>Create Next App</title>
         <meta name="registration" content="Register a new user" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Main>Register</Main>
+      <div>Register</div>
       <label>
         username:{' '}
         <input
@@ -92,6 +98,6 @@ export default function Register(props: Props) {
           </div>
         ))}
       {/* {errors.length} */}
-    </div>
+    </Main>
   );
 }

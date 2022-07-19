@@ -468,6 +468,7 @@ export async function scoreInsert(room_id, username) {
   console.log(roomid);
   const gamesId = await sql`
   SELECT id FROM games WHERE room_id=${roomid[0].id}`;
+  console.log('GAMES ID', gamesId);
   const user = await getUserByUsername(username);
   console.log(user);
   await sql`
@@ -520,4 +521,55 @@ export async function deleteScore(room_id) {
     SELECT id FROM games WHERE room_id=${roomid[0].id}`;
   await sql`
     UPDATE user_games_scores SET score=0 WHERE game_id=${gamesId[0].id}`;
+}
+export async function addRoundsIfWordGuessed(room_id: string) {
+  const roomid = await sql`
+  SELECT id FROM rooms WHERE name=${room_id};
+  `;
+  const users = await sql`
+  SELECT active_player_id FROM games WHERE room_id=${roomid[0].id}`;
+  console.log('last active user', users);
+  return users;
+}
+export async function roundsAdder(room_id: string, lastPlayer: string) {
+  const roomid = await sql`
+  SELECT id FROM rooms WHERE name=${room_id};
+  `;
+  const users = await getUsersInRoom(room_id);
+  console.log(
+    'last player',
+    lastPlayer,
+    'Last user in array',
+    users[users.length - 1].user_name,
+  );
+  if (lastPlayer === users[users.length - 1].user_name) {
+    const rounds = await sql`
+    UPDATE games SET  rounds=rounds+1 WHERE room_id=${roomid[0].id} RETURNING rounds
+      ;
+  `;
+    return rounds[0].rounds;
+  }
+}
+export async function SetWordAfterRounds(room_id) {
+  const roomid = await sql`
+  SELECT id FROM rooms WHERE name=${room_id};
+  `;
+  await sql`
+  UPDATE games SET word='' WHERE room_id=${roomid[0].id} `;
+}
+export async function DeleteEverythingIfNoUsersInRoom(room_id) {
+  await sql`
+  DELETE FROM messages WHERE room_id=${room_id}
+  `;
+  await sql`
+    DELETE FROM games WHERE room_id=${room_id}
+    `;
+}
+export async function ReturnActivePlayer(room_id) {
+  const roomid = await sql`
+  SELECT id FROM rooms WHERE name=${room_id};
+  `;
+  const activeplayer = await sql`
+  SELECT active_player_id FROM games WHERE room_id=${roomid[0].id}`;
+  return activeplayer;
 }

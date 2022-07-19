@@ -1,3 +1,4 @@
+import 'doodle.css/doodle.css';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -7,7 +8,19 @@ import { LoginResponseBody } from './api/login';
 type Props = {
   refreshUserProfile: () => Promise<void>;
 };
-const Main = styled.div``;
+const Main = styled.div`
+  @import url('https://fonts.googleapis.com/css2?family=Short+Stack&display=swap');
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+`;
+const LoginDiv = styled.div``;
+const UserDiv = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+`;
 export default function Register(props: Props) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -45,50 +58,54 @@ export default function Register(props: Props) {
   }
 
   return (
-    <div>
+    <Main className="doodle" style={{ backgroundColor: 'white' }}>
       <Head>
         <title>Create Next App</title>
         <meta name="login" content="Login" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Main>Login</Main>
-      <label>
-        username:{' '}
-        <input
-          value={username}
-          onChange={(event) => {
-            setUsername(event.currentTarget.value);
-          }}
-        />
-      </label>
-      <label>
-        password:{' '}
-        <input
-          type="password"
-          value={password}
-          onChange={(event) => {
-            setPassword(event.currentTarget.value);
-          }}
-        />
-      </label>
-      <button
-        onClick={() => {
-          loginHandler().catch((e) => {
-            console.log(e);
-          });
-        }}
-      >
-        Login
-      </button>
-      {errors.length > 0 &&
-        errors.map((error) => (
-          <div
-            style={{ color: 'white', backgroundColor: 'red', padding: '5px' }}
-            key={'error ' + error.message}
+      <LoginDiv>
+        {/* <div>Login</div> */}
+        <UserDiv>
+          <label>
+            username:{' '}
+            <input
+              value={username}
+              onChange={(event) => {
+                setUsername(event.currentTarget.value);
+              }}
+            />
+          </label>
+          <label>
+            password:{' '}
+            <input
+              type="password"
+              value={password}
+              onChange={(event) => {
+                setPassword(event.currentTarget.value);
+              }}
+            />
+          </label>
+          <button
+            onClick={() => {
+              loginHandler().catch((e) => {
+                console.log(e);
+              });
+            }}
           >
-            {error.message}
-          </div>
-        ))}
-    </div>
+            Login
+          </button>
+        </UserDiv>
+        {errors.length > 0 &&
+          errors.map((error) => (
+            <div
+              style={{ color: 'white', backgroundColor: 'red', padding: '5px' }}
+              key={'error ' + error.message}
+            >
+              {error.message}
+            </div>
+          ))}
+      </LoginDiv>
+    </Main>
   );
 }

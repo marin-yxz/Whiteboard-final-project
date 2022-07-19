@@ -25,13 +25,14 @@ export default function Header(props) {
   return (
     <HeaderMain className="doodle-border">
       <div className="doodle-border">
-        <Link href="/">Home</Link>
+        <Link href="/">Skribbly</Link>
       </div>
-      {props.user && (
+      {props.user && <a className="doodle-border">{props.user.username}</a>}
+      {/* {props.user && (
         <Link href="/user/private-profile">
           <a className="doodle-border">{props.user.username}</a>
         </Link>
-      )}
+      )} */}
       {props.user ? (
         // eslint-disable-next-line @next/next/no-html-link-for-pages
         <a className="doodle-border" href="/logout">
