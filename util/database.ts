@@ -1,8 +1,12 @@
 import camelcaseKeys from 'camelcase-keys';
 import { addSeconds } from 'date-fns';
-import { sq } from 'date-fns/locale';
+// import { sq } from 'date-fns/locale';
+import { config } from 'dotenv-safe';
 import postgres from 'postgres';
+import setPostgresDefaultsOnHeroku from './setPostgresDefaultsOnHeroku';
 
+config();
+setPostgresDefaultsOnHeroku();
 declare module globalThis {
   let postgresSqlClient: ReturnType<typeof postgres> | undefined;
 }
