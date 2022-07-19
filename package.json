@@ -5,10 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "SET NODE_ENV=development & npx ts-node-esm ./server/index.ts",
+    "start": "next start",
     "lint": "next lint",
     "migrate": "dotenv ley",
-    "mi5": "yarn migrate down && yarn migrate down  && yarn migrate down  && yarn migrate down  && yarn migrate down &&  yarn migrate down && yarn migrate down && yarn migrate up",
     "heroku-postbuild": "yarn migrate up && yarn build"
   },
   "dependencies": {
