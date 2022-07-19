@@ -24,9 +24,10 @@ export default function PrivateProfile(props: Props) {
   );
 }
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const user = await getUserByValidSessionToken(
-    context.req.cookies.sessionToken,
-  );
+  let user;
+  if (context.req.cookies.sessionToken) {
+    user = await getUserByValidSessionToken(context.req.cookies.sessionToken);
+  }
   console.log(user);
   if (user) {
     return {
