@@ -216,7 +216,7 @@ WHERE
 `;
   return retrieveMessages;
 }
-export async function getMessagesInRoom(room_id) {
+export async function getMessagesInRoom(room_id: string) {
   const roomid = await sql`
   SELECT id FROM rooms WHERE name=${room_id};
   `;
@@ -258,7 +258,7 @@ WHERE
   `;
   return users;
 }
-export async function getGameState(room_id) {
+export async function getGameState(room_id: string) {
   const roomid = await sql`
   SELECT id FROM rooms WHERE name=${room_id};
   `;
@@ -280,7 +280,13 @@ export async function setTheFirstPlayer(room_id: string, firstPlayer: string) {
   INSERT INTO  games(room_id,firstPlayer,rounds) VALUES(${roomid[0].id},${firstPlayer},0)`;
 }
 
-async function activePlayer(user, word, date, room, lastPlayer) {
+async function activePlayer(
+  user: string,
+  word: string,
+  date: string,
+  room: number,
+  lastPlayer: boolean,
+) {
   console.log(lastPlayer, 'last player');
   if (lastPlayer) {
     const activeplayer = await sql`
@@ -294,7 +300,7 @@ async function activePlayer(user, word, date, room, lastPlayer) {
     return activeplayer;
   }
 }
-async function findSocketFromPlayerName(name) {
+async function findSocketFromPlayerName(name: string) {
   const playerId = await sql`
 SELECT id FROM users WHERE username=${name}
 `;
@@ -380,9 +386,9 @@ export async function setGameState(room_id: string, active_player_id: string) {
   }
 }
 export async function addFirstPlayerIfFirstPlayerDisconnects(
-  roomId,
-  user,
-  nextUser,
+  roomId: [{ room_id: number; id: number }],
+  user: string,
+  nextUser: string,
 ) {
   const selectPlayer = await sql`
   SELECT firstPlayer FROM games WHERE room_id=${roomId[0].room_id}
@@ -465,7 +471,7 @@ WHERE
     return false;
   }
 }
-export async function scoreInsert(room_id, username) {
+export async function scoreInsert(room_id: string, username: string) {
   const roomid = await sql`
   SELECT id FROM rooms WHERE name=${room_id};
   `;
@@ -475,18 +481,20 @@ export async function scoreInsert(room_id, username) {
   console.log('GAMES ID', gamesId);
   const user = await getUserByUsername(username);
   console.log(user);
-  await sql`
-  INSERT INTO user_games_scores (user_id,game_id,score) VALUES(${user.id},${gamesId[0].id},0) ON CONFLICT(user_id) DO NOTHING`;
+  if (user?.id) {
+    await sql`
+    INSERT INTO user_games_scores (user_id,game_id,score) VALUES(${user.id},${gamesId[0].id},0) ON CONFLICT(user_id) DO NOTHING`;
+  }
 }
 
-export async function addtToScore(user_id) {
+export async function addtToScore(user_id: { id: number }) {
   await sql`
   UPDATE user_games_scores
    SET score = score + 1
 WHERE user_id = ${user_id.id};
   `;
 }
-export async function displayScore(room_id) {
+export async function displayScore(room_id: string) {
   const roomid = await sql`
   SELECT id FROM rooms WHERE name=${room_id};
   `;
@@ -517,7 +525,7 @@ export async function firstPlayerAfterRounds(room_id: string) {
     UPDATE games SET firstPlayer=${users[0].user_name},rounds=0 WHERE room_id=${roomid[0].id}`;
   return users[0].socket_id;
 }
-export async function deleteScore(room_id) {
+export async function deleteScore(room_id: string) {
   const roomid = await sql`
   SELECT id FROM rooms WHERE name=${room_id};
   `;
@@ -554,14 +562,14 @@ export async function roundsAdder(room_id: string, lastPlayer: string) {
     return rounds[0].rounds;
   }
 }
-export async function SetWordAfterRounds(room_id) {
+export async function SetWordAfterRounds(room_id: string) {
   const roomid = await sql`
   SELECT id FROM rooms WHERE name=${room_id};
   `;
   await sql`
   UPDATE games SET word='' WHERE room_id=${roomid[0].id} `;
 }
-export async function DeleteEverythingIfNoUsersInRoom(room_id) {
+export async function DeleteEverythingIfNoUsersInRoom(room_id: number) {
   await sql`
   DELETE FROM messages WHERE room_id=${room_id}
   `;
@@ -571,7 +579,7 @@ export async function DeleteEverythingIfNoUsersInRoom(room_id) {
     DELETE FROM games WHERE room_id=${room_id}
     `;
 }
-export async function ReturnActivePlayer(room_id) {
+export async function ReturnActivePlayer(room_id: string) {
   const roomid = await sql`
   SELECT id FROM rooms WHERE name=${room_id};
   `;
