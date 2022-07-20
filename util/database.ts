@@ -181,7 +181,7 @@ export async function createRoomifNotExistAndJoin(
   await sql`
     INSERT INTO user_room(user_id,room_id,socket_id,time) VALUES(${userId}, ${roomid[0].id}, ${socket} ,${time}) ON CONFLICT(user_id) DO NOTHING;
   `;
-  const gameId = await sql`
+  await sql`
   SELECT id from user_room WHERE room_id=${roomid[0].id}`;
   return createdRoom;
 }
@@ -262,7 +262,7 @@ export async function getGameState(room_id) {
   const roomid = await sql`
   SELECT id FROM rooms WHERE name=${room_id};
   `;
-  const gamesState = await sql`
+  await sql`
   SELECT games FROM rooms WHERE room_id=${roomid[0].id};
   `;
 }

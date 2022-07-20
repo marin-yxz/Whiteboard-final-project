@@ -3,7 +3,6 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import styled from 'styled-components';
 import { getAllRooms } from '../util/database';
 
 let socket;

@@ -34,10 +34,9 @@ export default function Header(props) {
         </Link>
       )} */}
       {props.user ? (
-        // eslint-disable-next-line @next/next/no-html-link-for-pages
-        <a className="doodle-border" href="/logout">
-          Logout
-        </a>
+        <Link className="doodle-border" href="/Logout">
+          <a className="doodle-border">Logout</a>
+        </Link>
       ) : (
         <>
           <Link className="doodle-border" href="/register">
