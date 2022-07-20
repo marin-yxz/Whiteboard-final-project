@@ -60,9 +60,9 @@ export default function Register(props: Props) {
   return (
     <Main className="doodle" style={{ backgroundColor: 'white' }}>
       <Head>
-        <title>Create Next App</title>
+        <title>Login</title>
         <meta name="login" content="Login" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/pen.png" />
       </Head>
       <LoginDiv>
         {/* <div>Login</div> */}
