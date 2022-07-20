@@ -10,6 +10,7 @@ import {
   deleteUserFromRoomIfDisconnect,
   displayScore,
   firstPlayerAfterRounds,
+  getAllRooms,
   getMessagesInRoom,
   getUserById,
   getUserByValidSessionToken,
@@ -60,6 +61,8 @@ const SocketHandler = (req, res) => {
           socket.nsp.to(usersInRoom[0].name).emit('room', usersInRoom);
         } else {
           await DeleteEverythingIfNoUsersInRoom(roomId[0].room_id);
+          const rooms = await getAllRooms();
+          socket.broadcast.emit('display-activeGame', rooms);
         }
       });
       socket.on('join-room', async (token, room) => {
@@ -76,6 +79,8 @@ const SocketHandler = (req, res) => {
           const usersInRoom = await getUsersInRoom(room.room);
           const messages = await getMessagesInRoom(room.room);
           await socket.join(room.room);
+          const rooms = await getAllRooms();
+          socket.broadcast.emit('display-activeGame', rooms);
           if (usersInRoom.length >= 2) {
           }
           if (usersInRoom.length === 1) {

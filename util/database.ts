@@ -1,6 +1,5 @@
 import camelcaseKeys from 'camelcase-keys';
 import { addSeconds } from 'date-fns';
-// import { sq } from 'date-fns/locale';
 import { config } from 'dotenv-safe';
 import postgres from 'postgres';
 import setPostgresDefaultsOnHeroku from './setPostgresDefaultsOnHeroku';
@@ -567,6 +566,8 @@ export async function DeleteEverythingIfNoUsersInRoom(room_id) {
   DELETE FROM messages WHERE room_id=${room_id}
   `;
   await sql`
+  DELETE FROM rooms WHERE id=${room_id}`;
+  await sql`
     DELETE FROM games WHERE room_id=${room_id}
     `;
 }
@@ -577,4 +578,21 @@ export async function ReturnActivePlayer(room_id) {
   const activeplayer = await sql`
   SELECT active_player_id FROM games WHERE room_id=${roomid[0].id}`;
   return activeplayer;
+}
+export async function getAllRooms() {
+  const users = await sql`
+  SELECT
+  name,
+  username
+FROM
+  users,
+  rooms,
+  user_room
+WHERE
+  user_room.user_id = users.id AND
+  user_room.room_id = rooms.id
+  ORDER BY "time" DESC;
+  `;
+  console.log(users);
+  return users;
 }
