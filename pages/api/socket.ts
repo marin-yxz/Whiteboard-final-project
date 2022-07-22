@@ -1,4 +1,3 @@
-import { NextApiRequest, NextApiResponse } from 'next';
 import { Server } from 'socket.io';
 import {
   addFirstPlayerIfFirstPlayerDisconnects,
@@ -66,34 +65,39 @@ const SocketHandler = (req, res) => {
           socket.broadcast.emit('display-activeGame', rooms);
         }
       });
-      socket.on('join-room', async (token, room) => {
-        const user = await getUserByValidSessionToken(token.token);
-        if (!user) {
-        } else {
-          const date = new Date();
-          await createRoomifNotExistAndJoin(
-            room.room,
-            user.id,
-            socket.id,
-            date.toISOString(),
-          );
-          const usersInRoom = await getUsersInRoom(room.room);
-          const messages = await getMessagesInRoom(room.room);
-          await socket.join(room.room);
-          const rooms = await getAllRooms();
-          socket.broadcast.emit('display-activeGame', rooms);
-          if (usersInRoom.length >= 2) {
-          }
-          if (usersInRoom.length === 1) {
-            await setTheFirstPlayer(room.room, user.username);
-            await scoreInsert(room.room, user.username);
-            socket.nsp.to(socket.id).emit('room', usersInRoom, messages, true);
+      socket.on(
+        'join-room',
+        async (token: { token: string }, room: { room: string }) => {
+          const user = await getUserByValidSessionToken(token.token);
+          if (!user) {
           } else {
-            await scoreInsert(room.room, user.username);
-            socket.nsp.to(room.room).emit('room', usersInRoom, messages);
+            const date = new Date();
+            await createRoomifNotExistAndJoin(
+              room.room,
+              user.id,
+              socket.id,
+              date.toISOString(),
+            );
+            const usersInRoom = await getUsersInRoom(room.room);
+            const messages = await getMessagesInRoom(room.room);
+            await socket.join(room.room);
+            const rooms = await getAllRooms();
+            socket.broadcast.emit('display-activeGame', rooms);
+            if (usersInRoom.length >= 2) {
+            }
+            if (usersInRoom.length === 1) {
+              await setTheFirstPlayer(room.room, user.username);
+              await scoreInsert(room.room, user.username);
+              socket.nsp
+                .to(socket.id)
+                .emit('room', usersInRoom, messages, true);
+            } else {
+              await scoreInsert(room.room, user.username);
+              socket.nsp.to(room.room).emit('room', usersInRoom, messages);
+            }
           }
-        }
-      });
+        },
+      );
       socket.on('activeplayer', async (token, room) => {
         const user = await getUserByValidSessionToken(token);
         if (!user) {

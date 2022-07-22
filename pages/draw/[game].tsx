@@ -1,7 +1,9 @@
 import 'doodle.css/doodle.css';
+import _ from 'lodash';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import Image2 from 'next/image';
+import { useRouter } from 'next/router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import io from 'socket.io-client';
@@ -85,6 +87,7 @@ const CounterDiv = styled.div`
 `;
 let drawingInterval;
 export default function Home(props) {
+  const router = useRouter();
   const [input, setInput] = useState('');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -205,10 +208,13 @@ export default function Home(props) {
         setReceievedMessage(messageInfo);
         socket.on('disconnect', () => {});
       });
-      socket.on('end-score', (scores) => {
-        console.log('IM EXPECTING SCORES', scores);
-        setDisplayEndScore(scores);
-      });
+      socket.on(
+        'end-score',
+        (scores: [{ user_name: string; score: number }]) => {
+          console.log('IM EXPECTING SCORES', scores);
+          setDisplayEndScore(_.uniqBy(scores, 'user_name'));
+        },
+      );
       socket.on('room', (users, messages, firstPlayerFromSocket) => {
         setUser(users);
         console.log('socket emited', firstPlayerFromSocket);
@@ -254,7 +260,17 @@ export default function Home(props) {
           }
         }
       });
+      const handleRouteChange = (url: string) => {
+        console.log(`App is changing to ${url}`);
+        socket.disconnect();
+      };
+      router.events.on('routeChangeStart', handleRouteChange);
+
+      return () => {
+        router.events.off('routeChangeStart', handleRouteChange);
+      };
     };
+
     socketInitializer().catch(() => {});
   }, [props.room, props.token, props.user]);
 

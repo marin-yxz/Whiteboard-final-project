@@ -389,5 +389,3 @@ exports.up = async (sql) => {
 		`;
   }
 };
-
-exports.down = async (sql) => {};
