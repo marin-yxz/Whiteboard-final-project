@@ -66,48 +66,49 @@ export default function Register(props: Props) {
         <meta name="registration" content="Register a new user" />
         <link rel="icon" href="/pen.png" />
       </Head>
-      <div>Register</div>
+
       <div>
-      <UserDiv>
-      <label>
-        username:{' '}
-        <input
-          value={username}
-          onChange={(event) => {
-            setUsername(event.currentTarget.value);
-          }}
-        />
-      </label>
-      <label>
-        password:{' '}
-        <input
-          value={password}
-          onChange={(event) => {
-            setPassword(event.currentTarget.value);
-          }}
-        />
-      </label>
-      <button
-        onClick={() => {
-          registerHandler().catch((e) => {
-            console.log(e);
-          });
-        }}
-      >
-        Register
-      </button>
-        </UserDiv>
-      {/* {errors[0].message ? '0' : errors[0].message} */}
-      {errors.length > 0 &&
-        errors.map((error) => (
-          <div
-            style={{ color: 'white', backgroundColor: 'red', padding: '5px' }}
-            key={'error ' + error.message}
+        <UserDiv>
+          <label>
+            username:{' '}
+            <input
+              value={username}
+              onChange={(event) => {
+                setUsername(event.currentTarget.value);
+              }}
+            />
+          </label>
+          <label>
+            password:{' '}
+            <input
+              value={password}
+              type="password"
+              onChange={(event) => {
+                setPassword(event.currentTarget.value);
+              }}
+            />
+          </label>
+          <button
+            onClick={() => {
+              registerHandler().catch((e) => {
+                console.log(e);
+              });
+            }}
           >
-            {error.message}
-          </div>
-        ))}
-      {/* {errors.length} */}
+            Register
+          </button>
+        </UserDiv>
+        {/* {errors[0].message ? '0' : errors[0].message} */}
+        {errors.length > 0 &&
+          errors.map((error) => (
+            <div
+              style={{ color: 'white', backgroundColor: 'red', padding: '5px' }}
+              key={'error ' + error.message}
+            >
+              {error.message}
+            </div>
+          ))}
+        {/* {errors.length} */}
       </div>
     </Main>
   );
