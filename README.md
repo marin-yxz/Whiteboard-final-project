@@ -1,1 +1,1 @@
-![React](/public/markdown/postgres-logo.png "Optional title")
+<img src="/public/markdown/postgres-logo.png" alt="Alt text" title="Optional title">
