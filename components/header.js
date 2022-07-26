@@ -34,7 +34,7 @@ export default function Header(props) {
         </Link>
       )} */}
       {props.user ? (
-        <Link className="doodle-border" href="/Logout">
+        <Link className="doodle-border" href="/logout">
           <a className="doodle-border">Logout</a>
         </Link>
       ) : (
