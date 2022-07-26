@@ -1,11 +1,12 @@
 import 'doodle.css/doodle.css';
 import _ from 'lodash';
+import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import styled from 'styled-components';
-import { getAllRooms } from '../util/database';
+import { getAllRooms, getUserByValidSessionToken } from '../util/database';
 
 const TitleDiv = styled.div`
   @import url('https://fonts.googleapis.com/css2?family=Edu+VIC+WA+NT+Beginner:wght@472&display=swap');
@@ -136,11 +137,17 @@ export default function Home(props) {
           <h5 style={{ margin: 0, padding: 0, paddingTop: '0.5vh' }}>
             Skribbly
           </h5>
+
           <CreateRoom>
             <Link href={'/draw/' + link}>
               <LinkRef className="doodle-border">create room and play!</LinkRef>
             </Link>
           </CreateRoom>
+          <h6 style={{ fontSize: '23px', color: 'red' }}>
+            {props.loged
+              ? ''
+              : 'warning! you have to be logged in to play games'}
+          </h6>
         </Container>
         <Container2 className="doodle">
           <Join>
@@ -165,19 +172,26 @@ export default function Home(props) {
     </div>
   );
 }
-export async function getServerSideProps() {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
   const userRooms = await getAllRooms();
   console.log(userRooms);
+  let user = '';
+  if (context.req.cookies.sessionToken) {
+    user = await getUserByValidSessionToken(context.req.cookies.sessionToken);
+  }
+
   if (userRooms) {
     return {
       props: {
         rooms: userRooms,
+        loged: user,
       },
     };
   } else {
     return {
       props: {
         rooms: [],
+        loged: user,
       },
     };
   }
