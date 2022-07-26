@@ -15,6 +15,11 @@ const Main = styled.div`
 type Props = {
   refreshUserProfile: () => Promise<void>;
 };
+const UserDiv = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+`;
 export default function Register(props: Props) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -60,6 +65,7 @@ export default function Register(props: Props) {
         <link rel="icon" href="/pen.png" />
       </Head>
       <div>Register</div>
+      <UserDiv>
       <label>
         username:{' '}
         <input
@@ -87,6 +93,7 @@ export default function Register(props: Props) {
       >
         Register
       </button>
+        </UserDiv>
       {/* {errors[0].message ? '0' : errors[0].message} */}
       {errors.length > 0 &&
         errors.map((error) => (
