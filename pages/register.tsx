@@ -7,9 +7,11 @@ import { RegisterResponseBody } from './api/register';
 
 const Main = styled.div`
   @import url('https://fonts.googleapis.com/css2?family=Short+Stack&display=swap');
-  height: 100%;
-  width: 100%;
   background-color: 'white';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
 `;
 
 type Props = {
