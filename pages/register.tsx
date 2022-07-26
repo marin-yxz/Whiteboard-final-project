@@ -65,6 +65,7 @@ export default function Register(props: Props) {
         <link rel="icon" href="/pen.png" />
       </Head>
       <div>Register</div>
+      <div>
       <UserDiv>
       <label>
         username:{' '}
@@ -105,6 +106,7 @@ export default function Register(props: Props) {
           </div>
         ))}
       {/* {errors.length} */}
+      </div>
     </Main>
   );
 }
