@@ -82,5 +82,8 @@
     "eslint-plugin-react-hooks": "4.6.0",
     "@typescript-eslint/utils": "5.30.0",
     "eslint-plugin-jsx-a11y": "6.6.0"
+  },
+  "engines": {
+    "node": "16.x"
   }
 }
