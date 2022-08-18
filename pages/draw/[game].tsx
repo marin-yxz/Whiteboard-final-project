@@ -7,11 +7,19 @@ import { useRouter } from 'next/router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import io from 'socket.io-client';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import logo from '../../public/pen.gif';
 import { getUserByValidSessionToken } from '../../util/database';
 
 let socket;
+const fadeOut = keyframes`
+  from{
+    opacity: 1;
+  }to
+    {
+    opacity: 0;
+  }
+`;
 const Chat = styled.div`
   /* height: 80vh; */
   margin-left: 20px;
@@ -85,6 +93,15 @@ const CounterDiv = styled.div`
   align-items: center;
   font-size: 30px;
 `;
+
+const EmojiDiv = styled.div`
+  padding: 2px;
+  cursor: pointer;
+`;
+const EmojiMessages = styled.div`
+  animation: ${fadeOut} 2.5s linear;
+  animation-fill-mode: forwards;
+`;
 let drawingInterval;
 export default function Home(props) {
   const router = useRouter();
@@ -97,6 +114,9 @@ export default function Home(props) {
   const [user, setUser] = useState<{ user_name: string; score: number }[]>([]);
   const [counter, setCounter] = useState<number>();
   const [sendingMessage, setSendingMessage] = useState<string>('');
+  const [emojiMessages, setEmojiMessages] = useState<
+    { user: string; emoji: string; time: number }[]
+  >([]);
   const [score, setScore] = useState<{ user_name: string; score: number }[]>(
     [],
   );
@@ -126,6 +146,21 @@ export default function Home(props) {
         contextRef.current = context;
       }
     }
+  }, []);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setEmojiMessages((prev) =>
+        prev
+          .filter((i) => i.time > 0)
+          .map((item) => {
+            return {
+              ...item,
+              time: item.time - 1,
+            };
+          }),
+      );
+    }, 1000);
+    return () => clearInterval(interval);
   }, []);
   const finishDrawing = () => {
     if (contextRef.current) {
@@ -208,6 +243,12 @@ export default function Home(props) {
         setReceievedMessage(messageInfo);
         socket.on('disconnect', () => {});
       });
+      socket.on('emojiNotifications', (emojiOBject) => {
+        console.log(emojiOBject);
+        // setEmojiMessages([...emojiMessages, ...emojiOBject]);
+        setEmojiMessages((prevMessages) => [...prevMessages, ...emojiOBject]);
+        console.log(emojiMessages);
+      });
       socket.on(
         'end-score',
         (scores: [{ user_name: string; score: number }]) => {
@@ -232,6 +273,7 @@ export default function Home(props) {
       socket.on('word', (wordFromSocket) => {
         setWord(wordFromSocket);
       });
+
       socket.on('canvas', (imageSrc: string) => {
         const canvas1 = canvasRef.current;
         if (canvas1) {
@@ -290,6 +332,15 @@ export default function Home(props) {
       setSendingMessage('');
     }
   };
+
+  function sendEmojiMessage(emojiCode) {
+    socket.emit('send-emoji', {
+      token: props.token,
+      emoji: emojiCode,
+      time: 2,
+      room: props.room,
+    });
+  }
   return (
     <>
       <Head>
@@ -331,6 +382,7 @@ export default function Home(props) {
                 );
               })}
               <h5>CURRENT SCORE:</h5>
+
               {score.map((score_user) => {
                 return (
                   <div key={score_user.user_name}>
@@ -355,6 +407,16 @@ export default function Home(props) {
                   height: '100%',
                 }}
               >
+                <div style={{ position: 'absolute' }}>
+                  {' '}
+                  {emojiMessages.map((msg) => {
+                    return (
+                      <EmojiMessages key={msg.emoji}>
+                        {msg.user}: {msg.emoji}
+                      </EmojiMessages>
+                    );
+                  })}
+                </div>
                 <canvas
                   className="border"
                   style={{ pointerEvents: 'none', display: 'block' }}
@@ -392,14 +454,48 @@ export default function Home(props) {
                     ))}
                   </PerfectScrollbar>
                 </Messages>
-                <input
-                  placeholder="Type here!"
-                  value={sendingMessage}
-                  onInput={(e) =>
-                    setSendingMessage((e.target as HTMLInputElement).value)
-                  }
-                  onKeyDown={handleKeyDown}
-                />
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <input
+                    placeholder="Type here!"
+                    value={sendingMessage}
+                    onInput={(e) =>
+                      setSendingMessage((e.target as HTMLInputElement).value)
+                    }
+                    onKeyDown={handleKeyDown}
+                  />
+                  <EmojiDiv
+                    onClick={() => {
+                      sendEmojiMessage('😅');
+                    }}
+                  >
+                    {' '}
+                    😅
+                  </EmojiDiv>
+                  <EmojiDiv
+                    onClick={() => {
+                      sendEmojiMessage('👍');
+                    }}
+                  >
+                    {' '}
+                    👍
+                  </EmojiDiv>
+                  <EmojiDiv
+                    onClick={() => {
+                      sendEmojiMessage('👎');
+                    }}
+                  >
+                    {' '}
+                    👎
+                  </EmojiDiv>
+                  <EmojiDiv
+                    onClick={() => {
+                      sendEmojiMessage('❔');
+                    }}
+                  >
+                    {' '}
+                    ❔
+                  </EmojiDiv>
+                </div>
               </Chat>
             </CanvasAndChat>
           </MainDiv>

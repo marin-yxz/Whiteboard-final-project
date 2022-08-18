@@ -1,3 +1,5 @@
+import crypto from 'node:crypto';
+import bcrypt from 'bcrypt';
 import camelcaseKeys from 'camelcase-keys';
 import { addSeconds } from 'date-fns';
 import { config } from 'dotenv-safe';
@@ -603,4 +605,42 @@ WHERE
   `;
   console.log(users);
   return users;
+}
+export async function addPasworldessUser(username: string) {
+  function makeid(length: number) {
+    let result = '';
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+  }
+  const passwordHash = await bcrypt.hash(makeid(10), 12);
+  async function query() {
+    try {
+      console.log(',arin');
+      const [user] = await sql<[User]>`
+      INSERT INTO users
+        (username,password_hash)
+      VALUES
+        (${username},${passwordHash})
+      RETURNING
+      id,
+      username
+    `;
+      return camelcaseKeys(user);
+    } catch (err) {
+      console.log(err);
+      const [user] = await sql<[User]>`
+    SELECT id,username
+    FROM users
+    WHERE
+    username=${username}
+  `;
+      return camelcaseKeys(user);
+    }
+  }
+  return query();
 }

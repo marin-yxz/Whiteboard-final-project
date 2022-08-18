@@ -13,13 +13,24 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   if (token) {
     await deleteSessionByToken(token);
 
-    context.res.setHeader(
-      'Set-Cookie',
+    context.res.setHeader('Set-Cookie', [
       cookie.serialize('sessionToken', '', {
         maxAge: -1,
         path: '/',
       }),
-    );
+      cookie.serialize('next-auth.session-token', '', {
+        maxAge: -1,
+        path: '/',
+      }),
+      cookie.serialize('next-auth.callback-url', '', {
+        maxAge: -1,
+        path: '/',
+      }),
+      cookie.serialize('next-auth.csrf-token', '', {
+        maxAge: -1,
+        path: '/',
+      }),
+    ]);
   }
 
   return {

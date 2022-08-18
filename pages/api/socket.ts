@@ -193,6 +193,17 @@ const SocketHandler = (req, res) => {
           }
         }
       });
+      socket.on('send-emoji', async (EmojiObject) => {
+        const user = await getUserByValidSessionToken(EmojiObject.token);
+        console.log(EmojiObject);
+        socket.nsp.to(EmojiObject.room).emit('emojiNotifications', [
+          {
+            user: user.username,
+            emoji: EmojiObject.emoji,
+            time: EmojiObject.time,
+          },
+        ]);
+      });
     });
   }
   res.end();

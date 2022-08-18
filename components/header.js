@@ -1,4 +1,5 @@
 import 'doodle.css/doodle.css';
+import { signOut } from 'next-auth/react';
 // import { css } from '@emotion/react';
 import Link from 'next/link';
 import styled from 'styled-components';
@@ -11,8 +12,11 @@ const HeaderMain = styled.header`
   border-radius: 4px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   display: flex;
-  gap: 10px;
+  gap: 20px;
+  height: 5vh;
+  padding: 10px;
   > div > a + a {
     margin-left: 10px;
   }
@@ -21,29 +25,31 @@ const HeaderMain = styled.header`
     margin-left: 10px;
   }
 `;
+function Anchor({ children, ...restProps }) {
+  // using a instead of Link since we want to force a full refresh
+  return <a {...restProps}>{children}</a>;
+}
 export default function Header(props) {
   return (
-    <HeaderMain className="doodle-border">
-      <div className="doodle-border">
+    <HeaderMain>
+      <div>
         <Link href="/">Skribbly</Link>
       </div>
-      {props.user && <a className="doodle-border">{props.user.username}</a>}
+      {props.user && <a>{props.user.username}</a>}
       {/* {props.user && (
         <Link href="/user/private-profile">
           <a className="doodle-border">{props.user.username}</a>
         </Link>
       )} */}
       {props.user ? (
-        <Link className="doodle-border" href="/logout">
-          <a className="doodle-border">Logout</a>
-        </Link>
+        <Anchor href="/logout">Logout</Anchor>
       ) : (
         <>
-          <Link className="doodle-border" href="/register">
-            <a className="doodle-border">Register</a>
+          <Link href="/register">
+            <a>Register</a>
           </Link>
-          <Link className="doodle-border" href="/login">
-            <a className="doodle-border">Login</a>
+          <Link href="/login">
+            <a>Login</a>
           </Link>
         </>
       )}

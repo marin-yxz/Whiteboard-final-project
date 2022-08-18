@@ -1,25 +1,85 @@
 import 'doodle.css/doodle.css';
+import { Button, TextField } from '@mui/material';
+import { GetServerSidePropsContext } from 'next';
+import { getSession, signIn, signOut, useSession } from 'next-auth/react';
 import Head from 'next/head';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import styled from 'styled-components';
+import spaceImage from '../public/629732.png';
 import { LoginResponseBody } from './api/login';
 
 type Props = {
   refreshUserProfile: () => Promise<void>;
 };
-const Main = styled.div`
-  @import url('https://fonts.googleapis.com/css2?family=Short+Stack&display=swap');
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 60vh;
+
+const LoginDiv = styled.div`
+  width: 100%;
 `;
-const LoginDiv = styled.div``;
 const UserDiv = styled.div`
   display: flex;
   justify-content: center;
   flex-direction: column;
+  width: 100%;
+  & + & {
+    margin-top: 10px;
+  }
+`;
+const LoginSection = styled.div`
+  /* display: flex; */
+  /* justify-content: center; */
+
+  /* width: 60vw; */
+  width: 100%;
+  max-width: 40vw;
+  height: 95vh;
+  padding: 30px;
+  border-radius: 5px;
+  box-shadow: 0px 10px 13px -7px #000000, 0px 0px 27px 11px rgba(0, 0, 0, 0.1);
+`;
+const Main = styled.div`
+  display: flex;
+`;
+const ImageDiv = styled.div`
+  display: flex;
+  overflow: hidden;
+`;
+const LoginContainer = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  & + & {
+    padding: 30px;
+  }
+`;
+const TextDiv = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+`;
+const RegisterDiv = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  padding: 10px;
+  align-items: center;
+  margin-top: 8px;
+  gap: 3px;
+`;
+const StyledLink = styled(Link)`
+  color: red;
+`;
+const AnchorLink = styled.a`
+  font-size: 11px;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: chocolate;
+  &:hover {
+    color: blue;
+  }
 `;
 export default function Register(props: Props) {
   const [username, setUsername] = useState('');
@@ -29,7 +89,14 @@ export default function Register(props: Props) {
       message: string;
     }[]
   >([]);
+  const { data: session, status } = useSession();
+  console.log(status);
+
+  console.log(session);
+  if (status === 'authenticated') {
+  }
   const router = useRouter();
+
   async function loginHandler() {
     const loginRespones = await fetch('/api/login', {
       method: 'POST',
@@ -58,54 +125,103 @@ export default function Register(props: Props) {
   }
 
   return (
-    <Main className="doodle" style={{ backgroundColor: 'white' }}>
+    <>
       <Head>
         <title>Login</title>
         <meta name="login" content="Login" />
         <link rel="icon" href="/pen.png" />
       </Head>
-      <LoginDiv>
-        {/* <div>Login</div> */}
-        <UserDiv>
-          <label>
-            username:{' '}
-            <input
-              value={username}
-              onChange={(event) => {
-                setUsername(event.currentTarget.value);
-              }}
-            />
-          </label>
-          <label>
-            password:{' '}
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => {
-                setPassword(event.currentTarget.value);
-              }}
-            />
-          </label>
-          <button
-            onClick={() => {
-              loginHandler().catch((e) => {
-                console.log(e);
-              });
-            }}
-          >
-            Login
-          </button>
-        </UserDiv>
-        {errors.length > 0 &&
-          errors.map((error) => (
-            <div
-              style={{ color: 'white', backgroundColor: 'red', padding: '5px' }}
-              key={'error ' + error.message}
-            >
-              {error.message}
-            </div>
-          ))}
-      </LoginDiv>
-    </Main>
+      <Main>
+        <LoginSection>
+          <LoginContainer style={{ backgroundColor: 'white' }}>
+            <LoginDiv>
+              {/* <div>Login</div> */}
+              <UserDiv>
+                <TextDiv>
+                  <h1>Welcome back to Skribbly login</h1>
+                  <h3 style={{ opacity: '0.7' }}>
+                    It's great to have you back!
+                  </h3>
+                </TextDiv>
+                <TextField
+                  value={username}
+                  onChange={(event) => {
+                    setUsername(event.currentTarget.value);
+                  }}
+                  id="standard-basic"
+                  label="username"
+                  margin="normal"
+                  variant="standard"
+                />
+                <TextField
+                  type="password"
+                  value={password}
+                  onChange={(event) => {
+                    setPassword(event.currentTarget.value);
+                  }}
+                  margin="normal"
+                  id="standard-basic"
+                  label="password"
+                  variant="standard"
+                />
+
+                <Button
+                  style={{ marginTop: '30px' }}
+                  onClick={() => {
+                    loginHandler().catch((e) => {
+                      console.log(e);
+                    });
+                  }}
+                  variant="contained"
+                  disableElevation
+                >
+                  login
+                </Button>
+              </UserDiv>
+              {errors.length > 0 &&
+                errors.map((error) => (
+                  <div
+                    style={{
+                      color: 'white',
+                      backgroundColor: 'red',
+                      padding: '5px',
+                    }}
+                    key={'error ' + error.message}
+                  >
+                    {error.message}
+                  </div>
+                ))}
+              <RegisterDiv>
+                <h6 style={{ margin: 0, opacity: '0.9', padding: 0 }}>
+                  Not a member?
+                </h6>
+                <button onClick={() => signIn('google')}>Sign In</button>
+                <StyledLink style={{ margin: 0 }} href="/register">
+                  <AnchorLink>Signup</AnchorLink>
+                </StyledLink>
+              </RegisterDiv>
+            </LoginDiv>
+          </LoginContainer>
+        </LoginSection>
+        <ImageDiv>
+          <Image objectFit="cover" src={spaceImage} alt="yo" />
+        </ImageDiv>
+      </Main>
+    </>
   );
+}
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  const session = await getSession(context);
+  console.log('this is my session', session);
+  if (session) {
+    return {
+      redirect: {
+        destination: '/',
+      },
+    };
+  }
+  return {
+    props: { session },
+  };
 }

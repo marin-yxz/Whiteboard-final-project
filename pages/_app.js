@@ -1,8 +1,9 @@
 import '../styles/globals.css';
+import { SessionProvider } from 'next-auth/react';
 import { useCallback, useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps, session }) {
   const [user, setUser] = useState();
 
   const refreshUserProfile = useCallback(async () => {
@@ -17,24 +18,26 @@ function MyApp({ Component, pageProps }) {
       setUser(undefined);
     }
   }, []);
-
+  console.log(session);
   // useEffect is only frontend
   useEffect(() => {
     refreshUserProfile().catch(() => console.log('fetch api failed'));
   }, [refreshUserProfile]);
   // console.log(user);
   return (
-    <Layout user={user}>
-      {/*
+    <SessionProvider session={session}>
+      <Layout user={user}>
+        {/*
           The "Component" component refers to
           the current page that is being rendered
         */}
-      <Component
-        {...pageProps}
-        // user={user}
-        refreshUserProfile={refreshUserProfile}
-      />
-    </Layout>
+        <Component
+          {...pageProps}
+          // user={user}
+          refreshUserProfile={refreshUserProfile}
+        />
+      </Layout>
+    </SessionProvider>
   );
 }
 

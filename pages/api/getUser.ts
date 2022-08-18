@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getSession } from 'next-auth/react';
 import { getUserByValidSessionToken } from '../../util/database';
 
 export default async function handler(
