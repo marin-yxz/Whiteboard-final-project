@@ -86,7 +86,7 @@ const nextAuthOptions = (req, res) => {
         return true;
       },
     },
-    secret: process.env.SECRET,
+    secret: process.env.JWT_SECRET,
   };
 };
 export default (req, res) => {
