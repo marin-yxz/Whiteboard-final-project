@@ -19,7 +19,9 @@ const nextAuthOptions = (req, res) => {
       // redirect(url, baseUrl) {
       //   return baseUrl;
       // },
-
+      async redirect({ url, baseUrl }) {
+        return baseUrl;
+      },
       async signIn(user, account, profile) {
         if (user) {
           const token = crypto.randomBytes(80).toString('base64');

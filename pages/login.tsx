@@ -246,13 +246,13 @@ export default function Register(props: Props) {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
   console.log('this is my session', session);
-  if (session) {
-    return {
-      redirect: {
-        destination: '/',
-      },
-    };
-  }
+  // if (session) {
+  //   return {
+  //     redirect: {
+  //       destination: '/',
+  //     },
+  //   };
+  // }
   return {
     props: { session },
   };
