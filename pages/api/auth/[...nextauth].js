@@ -7,41 +7,6 @@ import { redirect } from 'next/dist/server/api-utils';
 import { createSerializedRegisterSessionTokenCookie } from '../../../util/cookies';
 import { addPasworldessUser, createSession } from '../../../util/database';
 
-// export default(req,res){
-
-// }
-// export default NextAuth({
-//   debug: true,
-//   providers: [
-//     GoogleProvider({
-//       clientId: process.env.GOOGLE_CLIENT_ID,
-//       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-//     }),
-//   ],
-//   secret: process.env.JWT_SECRET,
-//   callbacks: {
-//     // redirect(url, baseUrl) {
-//     //   return baseUrl;
-//     // },
-
-//     async signIn(user, account, profile) {
-//       if (user) {
-//         const token = crypto.randomBytes(80).toString('base64');
-//         // const session = await createSession(token);
-//         console.log('this is my user', user.user.name);
-//         console.log('this is the session i created', token);
-//         const returningUser = await addPasworldessUser(user.user.name);
-//         const session = await createSession(token, returningUser.id);
-//         const serializeCookie =
-//           await createSerializedRegisterSessionTokenCookie(session.token);
-//         console.log(session);
-//         console.log(returningUser);
-//       }
-//       return true;
-//     },
-//   },
-// });
-
 const nextAuthOptions = (req, res) => {
   return {
     providers: [

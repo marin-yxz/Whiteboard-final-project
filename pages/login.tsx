@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import GoogleButton from 'react-google-button';
 import styled from 'styled-components';
 import spaceImage from '../public/629732.png';
 import { LoginResponseBody } from './api/login';
@@ -195,11 +196,42 @@ export default function Register(props: Props) {
                 <h6 style={{ margin: 0, opacity: '0.9', padding: 0 }}>
                   Not a member?
                 </h6>
-                <button onClick={() => signIn('google')}>Sign In</button>
+
                 <StyledLink style={{ margin: 0 }} href="/register">
                   <AnchorLink>Signup</AnchorLink>
                 </StyledLink>
               </RegisterDiv>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                {' '}
+                <h2>OR</h2>
+                {/* <button
+                  style={{
+                    backgroundColor: 'white',
+                    border: '0.5px solid black',
+                    borderRadius: '3px',
+                    paddingLeft: '20px',
+                    paddingRight: '20px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => signIn('google')}
+                >
+                  Login with google
+                </button> */}
+                <GoogleButton
+                  onClick={() => {
+                    signIn('google').catch((err) => {
+                      console.log(err);
+                    });
+                  }}
+                />
+              </div>
             </LoginDiv>
           </LoginContainer>
         </LoginSection>
