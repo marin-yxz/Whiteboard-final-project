@@ -46,6 +46,12 @@ const nextAuthOptions = (req, res) => {
               maxAge: -1,
               path: '/',
             }),
+            cookie.serialize('__Secure-next-auth.session-token'),
+            '',
+            {
+              maxAge: -1,
+              path: '/',
+            },
           ]);
         }
         return true;
