@@ -86,6 +86,7 @@ const nextAuthOptions = (req, res) => {
         return true;
       },
     },
+    secret: process.env.SECRET,
   };
 };
 export default (req, res) => {
